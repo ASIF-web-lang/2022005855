@@ -1,25 +1,25 @@
 import React, { Component } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { withTranslation } from 'react-i18next';
-import './App.css';
-import Header from './components/Header/Header';
-import SearchBar from './components/SearchBar/SearchBar';
-import DataDisplay from './components/DataDisplay/DataDisplay';
+import './TrainApp.css';
+import CustomHeader from './components/CustomHeader/CustomHeader';
+import CustomSearchBar from './components/CustomSearchBar/CustomSearchBar';
+import CustomDataDisplay from './components/CustomDataDisplay/CustomDataDisplay';
 
 const API = 'http://20.244.56.144/train/trains';
 
-class App extends Component {
+class TrainApp extends Component {
   constructor(props) {
     super(props);
     this.state = {
       error: null,
-      stations: [], 
-      passengerStations: [], 
+      stations: [],
+      passengerStations: [],
       todaysTrains: [],
       selectedStation: null,
       arrivalData: [],
       departureData: [],
-      tabIndex: 0 
+      tabIndex: 0,
     };
   }
 
@@ -28,39 +28,39 @@ class App extends Component {
   }
 
   componentDidUpdate() {
-    document.title = this.props.t('title'); 
+    document.title = this.props.t('pageTitle');
   }
 
-  handleInputChange = selectedStation => {
+  handleInputChange = (selectedStation) => {
     this.setState({ selectedStation });
     this.filterData(selectedStation);
   };
 
   fetchAll() {
-    const dateNow = new Date().toISOString().slice(0, 10); 
+    const dateNow = new Date().toISOString().slice(0, 10);
     Promise.all([
-      fetch(`${API}metadata/stations`).then(response => response.json()),
-      fetch(`${API}trains/${dateNow}`).then(response => response.json())
+      fetch(`${API}metadata/stations`).then((response) => response.json()),
+      fetch(`${API}trains/${dateNow}`).then((response) => response.json()),
     ]).then(
-      allResponses => {
-        const stations = allResponses[0].map(station => ({
+      (allResponses) => {
+        const stations = allResponses[0].map((station) => ({
           value: station.stationShortCode,
           label: station.stationName.includes(' asema')
             ? station.stationName.slice(0, -6)
-            : station.stationName
+            : station.stationName,
         }));
         const passengerStations = allResponses[0]
-          .filter(station => station.passengerTraffic === true)
-          .map(station => ({
+          .filter((station) => station.passengerTraffic === true)
+          .map((station) => ({
             value: station.stationShortCode,
             label: station.stationName.includes(' asema')
               ? station.stationName.slice(0, -6)
-              : station.stationName
+              : station.stationName,
           }));
         const todaysTrains = allResponses[1];
         this.setState({ stations, passengerStations, todaysTrains });
       },
-      error => {
+      (error) => {
         this.setState({ error });
       }
     );
@@ -70,30 +70,28 @@ class App extends Component {
     const { todaysTrains, stations } = this.state;
     const dateTimeNow = new Date().toJSON();
     const filteredData = todaysTrains
-      .map(train => {
+      .map((train) => {
         const trainNumber = train.commuterLineID
           ? `Commuter train ${train.commuterLineID}`
           : `${train.trainType} ${train.trainNumber}`;
-        const originShortCode = train.timeTableRows[0].stationShortCode; 
+        const originShortCode = train.timeTableRows[0].stationShortCode;
         const origin = stations.find(
-          station => station.value === originShortCode
-        ).label; 
+          (station) => station.value === originShortCode
+        ).label;
         const destinationShortCode =
-          train.timeTableRows[train.timeTableRows.length - 1][
-            'stationShortCode'
-          ];
+          train.timeTableRows[train.timeTableRows.length - 1]['stationShortCode'];
         const destination = stations.find(
-          station => station.value === destinationShortCode
+          (station) => station.value === destinationShortCode
         ).label;
 
-        let scheduledArrivalTime; 
+        let scheduledArrivalTime;
         let actualArrivalTime;
         const arrivalTimeTable = {
           ...train.timeTableRows.filter(
-            element =>
+            (element) =>
               element.stationShortCode === selectedStation.value &&
               element.type === 'ARRIVAL'
-          )[0]
+          )[0],
         };
         if (arrivalTimeTable) {
           if (arrivalTimeTable.hasOwnProperty('scheduledTime')) {
@@ -108,14 +106,14 @@ class App extends Component {
           }
         }
 
-        let scheduledDepartureTime; 
+        let scheduledDepartureTime;
         let actualDepartureTime;
         const departureTimeTable = {
           ...train.timeTableRows.filter(
-            element =>
+            (element) =>
               element.stationShortCode === selectedStation.value &&
               element.type === 'DEPARTURE'
-          )[0]
+          )[0],
         };
         if (departureTimeTable) {
           if (departureTimeTable.hasOwnProperty('scheduledTime')) {
@@ -138,30 +136,30 @@ class App extends Component {
           scheduledArrivalTime,
           actualArrivalTime,
           scheduledDepartureTime,
-          actualDepartureTime
+          actualDepartureTime,
         };
       })
-      .filter(train => train.trainCategory !== 'Cargo') // removes cargo entries
+      .filter((train) => train.trainCategory !== 'Cargo') // removes cargo entries
       .filter(
-        train =>
+        (train) =>
           train.actualArrivalTime > dateTimeNow ||
           train.scheduledArrivalTime > dateTimeNow ||
           train.actualDepartureTime > dateTimeNow ||
           train.scheduledDepartureTime > dateTimeNow
       ); // filters only time entries after "now"
     const arrivalData = filteredData
-      .filter(entry => typeof entry.scheduledArrivalTime !== 'undefined')
-      .map(entry => ({
+      .filter((entry) => typeof entry.scheduledArrivalTime !== 'undefined')
+      .map((entry) => ({
         ...entry,
         actualTime: entry.actualArrivalTime,
-        scheduledTime: entry.scheduledArrivalTime
+        scheduledTime: entry.scheduledArrivalTime,
       }));
     const departureData = filteredData
-      .filter(entry => typeof entry.scheduledDepartureTime !== 'undefined')
-      .map(entry => ({
+      .filter((entry) => typeof entry.scheduledDepartureTime !== 'undefined')
+      .map((entry) => ({
         ...entry,
         actualTime: entry.actualDepartureTime,
-        scheduledTime: entry.scheduledDepartureTime
+        scheduledTime: entry.scheduledDepartureTime,
       }));
     this.setState({ arrivalData, departureData });
   }
@@ -172,7 +170,7 @@ class App extends Component {
       tabIndex,
       arrivalData,
       departureData,
-      todaysTrains
+      todaysTrains,
     } = this.state;
     const { t } = this.props;
     const errorDisplay = (
@@ -184,28 +182,28 @@ class App extends Component {
       ) : (
         <Tabs
           selectedIndex={tabIndex}
-          onSelect={tabIndex => this.setState({ tabIndex })}
+          onSelect={(tabIndex) => this.setState({ tabIndex })}
         >
           <TabList>
             <Tab>{t('Arrivals')}</Tab>
             <Tab>{t('Departures')}</Tab>
           </TabList>
           <TabPanel>
-            <DataDisplay display="arrival" filteredData={arrivalData} />
+            <CustomDataDisplay display="arrival" filteredData={arrivalData} />
             {errorDisplay}
           </TabPanel>
           <TabPanel>
-            <DataDisplay display="departure" filteredData={departureData} />
+            <CustomDataDisplay display="departure" filteredData={departureData} />
             {errorDisplay}
           </TabPanel>
         </Tabs>
       );
     return (
-      <div className="App">
-        <Header />
-        <SearchBar
+      <div className="train-app">
+        <CustomHeader />
+        <CustomSearchBar
           placeholder={t('Look for train station')}
-          noOptionsMessage={inputValue => t('Not found')}
+          noOptionsMessage={(inputValue) => t('Not found')}
           options={this.state.passengerStations}
           onChange={this.handleInputChange}
         />
@@ -215,4 +213,5 @@ class App extends Component {
   }
 }
 
-export default withTranslation()(App);
+export default withTranslation()(TrainApp);
+
