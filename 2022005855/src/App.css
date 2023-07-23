@@ -1,3 +1,4 @@
+/* Add the following styles to TrainApp.css */
 .App {
   font-size: 14px;
 }
@@ -11,11 +12,10 @@
   color: red;
 }
 
-
+/* Update the styles for the react-tabs component */
 .react-tabs {
   -webkit-tap-highlight-color: transparent;
   margin-left: 30px;
- 
   width: 100%;
 }
 
@@ -25,18 +25,19 @@
   padding: 0;
   color: #59a127;
   font-weight: 500;
+  display: flex; /* Add this line to use flexbox for tab layout */
 }
 
 .react-tabs__tab {
-  min-width: 62px;
-  display: inline-block;
+  /* Update the styling of tabs to have equal width and padding */
+  flex: 1;
   border: 1px solid transparent;
   border-bottom: none;
-  bottom: -1px;
   position: relative;
   list-style: none;
-  padding: 6px 12px;
+  padding: 10px;
   cursor: pointer;
+  text-align: center; /* Add this line to center text within tabs */
 }
 
 .react-tabs__tab--selected {
@@ -74,3 +75,4 @@
 .react-tabs__tab-panel--selected {
   display: block;
 }
+
