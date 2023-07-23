@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import './DataDisplay.css';
 
 const formatTime = dateTime => {
-  //returns a time in the correct timezone
+  // returns a time in the correct timezone
   return new Intl.DateTimeFormat('default', {
     hour: 'numeric',
     minute: 'numeric'
@@ -12,30 +12,26 @@ const formatTime = dateTime => {
 
 const DataDisplay = props => {
   const { t } = useTranslation();
+
   const filteredData = props.filteredData
-    .sort((a, b) => (a.scheduledTime > b.scheduledTime ? 1 : -1)) 
-      ...train,
-      time:
-        train.actualTime &&
-        formatTime(train.actualTime) !== formatTime(train.scheduledTime) ? ( 
-          <>
-            <span className="red">{formatTime(train.actualTime)}</span>
-            <span className="under">({formatTime(train.scheduledTime)})</span>
-          </>
-        ) : (
-          formatTime(train.scheduledTime)
-        )
-    }))
+    .sort((a, b) => (a.scheduledTime > b.scheduledTime ? 1 : -1))
     .map(train => (
       <tr
-        key={train.trainNumber + '_' + train.scheduledTime} 
+        key={train.trainNumber + '_' + train.scheduledTime}
         className={train.cancelled ? 'cancelled' : null}
       >
         <td>{train.trainNumber}</td>
         <td>{train.origin}</td>
         <td>{train.destination}</td>
         <td>
-          {train.time}{' '}
+          {train.actualTime && train.actualTime !== train.scheduledTime ? (
+            <>
+              <span className="red">{formatTime(train.actualTime)}</span>
+              <span className="under">({formatTime(train.scheduledTime)})</span>
+            </>
+          ) : (
+            formatTime(train.scheduledTime)
+          )}
           {train.cancelled ? (
             <span className="cancelled">{t('Cancelled')}</span>
           ) : null}
